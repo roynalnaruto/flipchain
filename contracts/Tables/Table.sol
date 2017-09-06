@@ -13,15 +13,35 @@ contract Table {
   enum Scope { PUBLIC, PRIVATE }
 
   /**
+   * Struct
+   */
+  struct User {
+    uint joined;
+    string name;
+    uint balance;
+  }
+
+  /**
    * Storage
    */
   uint public interval;
   address public owner;
   address public creator;
   Scope public scope;
-  uint public balance;
-  address[] users;
-  mapping (address => uint) balances;
+  uint public numUsers;
+  mapping(address => User) users;
+
+  /**
+   * Modifier
+   */
+  modifier userOnTable() {
+    require(users[msg.sender].joined != 0);
+    _;
+  }
+  modifier userNotOnTable() {
+    require(users[msg.sender].joined == 0);
+    _;
+  }
 
   /**
    * @dev Constructor for Table
@@ -33,5 +53,11 @@ contract Table {
     creator = _creator;
     scope = _scope;
     interval = _interval;
+    numUsers = 1;
+    users[msg.sender] = User({
+        joined: now,
+        name: 'hello',
+        balance: 0
+      });
   }
 }

@@ -1,6 +1,6 @@
 pragma solidity 0.4.15;
 
-import "./Table.sol";
+import "../Tables/Table.sol";
 
 /**
  * @title BaccaratTable - Game engine for Baccarat table
@@ -92,6 +92,9 @@ contract BaccaratTable is Table {
    * Storage
    */
   State public state;
+  uint public maxUsers;
+  uint8 constant minBetAmount = 1;
+  uint8 constant maxBetAmount = 10;
   uint8 delay;
   uint8[] cardOrder;
   uint8 cardIndex;
@@ -99,13 +102,35 @@ contract BaccaratTable is Table {
   Round currentRound;
 
   /**
+   * modifiers
+   */
+  modifier canJoin {
+    require(numUsers+1 <= maxUsers && scope == Scope.PUBLIC);
+    _;
+  }
+
+  /**
    * @dev Constructor
    * @param _creator Creator of table
    * @param _scope Scope of table public or private
    * @param _interval Interval between two rounds
    */
-  function BaccaratTable(address _creator, Scope _scope, uint _interval)
+  function BaccaratTable(address _creator, Scope _scope, uint _interval, uint _maxUsers)
     public Table(_creator, _scope, _interval) {
-
+      maxUsers = _maxUsers;
     }
+
+  /**
+   * @dev user joins table
+   * @param _name Name of the player
+   */
+  function joinTable(string _name) canJoin userNotOnTable {
+    users[msg.sender] = User({
+        joined: now,
+        name: _name,
+        balance: 0
+      });
+    numUsers = numUsers+1;
+  }
+
 }
